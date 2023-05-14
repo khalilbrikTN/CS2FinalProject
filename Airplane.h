@@ -39,10 +39,6 @@ public:
          Twait = t;
     }
 
-    void incrementTwait() {
-        Twait++;
-    }
-
 };
 
 #endif //DEQSIMULATION_AIRPLANE_H

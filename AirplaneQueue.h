@@ -12,7 +12,7 @@ class AirplaneQueue {
 private:
     Deque<Airplane> airplaneQueue;
     int landingTime;
-    //Airplane* next;
+
 public:
     AirplaneQueue(int t);
     void addAirplane(Airplane a);
@@ -25,7 +25,6 @@ public:
 
 AirplaneQueue::AirplaneQueue(int t) {
     landingTime = t;
-    //next = nullptr;
 }
 
 bool AirplaneQueue::isEmpty() {
@@ -34,7 +33,6 @@ bool AirplaneQueue::isEmpty() {
 
 void AirplaneQueue::addAirplane(Airplane a) {
     airplaneQueue.pushBack(a);
-    //*next = a;
 }
 
 Airplane AirplaneQueue::removeAirplane() {
@@ -53,15 +51,6 @@ Airplane* AirplaneQueue::getfront() {
     return p;
 }
 
-Airplane* AirplaneQueue::getNext() {
-    if (getfront() == nullptr) {
-        return nullptr; // There are no more airplanes in the queue
-    } else {
-        Airplane* p;
-        *p = airplaneQueue.getnext();
-        return p; // Return the next airplane in the queue
-    }
-}
 
 
 #endif //DEQSIMULATION_AirplaneQueue_H
