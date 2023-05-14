@@ -3,7 +3,6 @@
 #include "AirplaneQueue.h"
 #include "Airplane.h"
 #include <ctime>
-#include <cmath>
 #include <cstdlib>
 using namespace std;
 
@@ -12,7 +11,7 @@ float Generate_Random(int Dt) {
     return (Dt-3) + r;
 }
 
-void planeDeparture(int, int, int&);
+// void planeDeparture(int, int, int&);
 
 int main() {
     srand(time(NULL));
@@ -26,63 +25,103 @@ int main() {
 
     // Initialize simulation time and counters
     int time = 0;
+    int counter = 1;
     int totalPlanesArrived = 0;
-    int totalPlanesLeft = 14;
-    int totalPlanesDelayed = 8;
-    int totalWaitTime = 56;
+    int totalPlanesLeft = 0;
+    int totalPlanesDelayed = 0;
+    int totalWaitTime = 0;
 
     while (time < Tmax) { // as long as the simulation is working
         nextPlaneIn = Generate_Random(Dt);
-        cout << "Rand: "<< nextPlaneIn << endl;
-
+        cout << "Next Plane comes in: "<< nextPlaneIn << " minutes" << endl << endl;
         time += nextPlaneIn;
-        cout << "Time: " << time << endl;
+        int h = time / 60;
+        int m = time % 60;
+
+
+        cout << "Time now is: " << h << ":" << m << endl;
 
         // Check for new arrivals
         Airplane plane(time);
         AirplaneQ.addAirplane(plane); // Add the plane to the AirplaneQ queue
+
+        int hours = plane.getTarrival() / 60;
+        int minutes = plane.getTarrival() % 60;
+
+        cout << "Plane " << counter << " has arrived at " << hours << ":" << minutes << endl;
+        counter++;
         totalPlanesArrived++;
 
+        if (AirplaneQ.queueLength() <= 1) {
+            if (plane.getTarrival() > AirplaneQ.getfront()->getTdeparture()) { // arrival time of new plane smaller than departure of old one
 
-        // Check for departing planes
-        if (AirplaneQ.queueLength() > 1) {
 
-            if (plane.getTarrival() > AirplaneQ.getfront()->getTdeparture()) {
-                cout << plane.getTarrival() << endl;
-                cout << AirplaneQ.getfront()->getTdeparture() << endl;
+                hours = AirplaneQ.getfront()->getTdeparture() / 60;
+                minutes = AirplaneQ.getfront()->getTdeparture() % 60;
+
+                cout << "Runway is free at " << hours << ":" << minutes << endl;
+
                 Airplane served = AirplaneQ.removeAirplane(); // The first plane in the queue lands and is served
                 served.hasLanded();
-                time += Tservice;
+
+                cout << hours << ":" << minutes << " --> Runway is now free" << endl << endl;
+
+                totalPlanesLeft++;
+
             } else {
                 // Calculate wait time
-                int waitTime = AirplaneQ.getfront()->getTdeparture() -  plane.getTarrival();
+
+                int waitTime = AirplaneQ.getfront()->getTdeparture() - plane.getTarrival();
+                if (AirplaneQ.queueLength() == 1)
+                    waitTime = 0;
+                else
+                    cout << "Please remain airborne for: " << waitTime << " minutes" << endl;
+
+                //cout << "New plane arrives: " << plane.getTarrival() << endl;
+                //cout << "Front plane departs: " << AirplaneQ.getfront()->getTdeparture() << endl;
 
                 plane.setTwait(waitTime);
                 totalWaitTime += waitTime;
+                time += waitTime;
 
-                if (waitTime < delay) { // If the wait time is less than the departure threshold
-                    totalPlanesLeft++;
-                } else { // Otherwise, the plane has been delayed
-                    totalPlanesDelayed++;
-                    cout << "Plane is facing a delay of " << plane.getTwait() << endl;
-                }
+                totalPlanesDelayed++;
+
             }
+        } else {
+            if (plane.getTarrival() > AirplaneQ.getfront()->getTdeparture()) { // arrival time of new plane smaller than departure of old one
 
-        } else{
-            int waitInterval = (AirplaneQ.getfront()->getTdeparture() +  plane.getTarrival()) / 2;
-            for (int i = 0; i < waitInterval+5; ++i) {
-                planeDeparture(plane.getTarrival(), AirplaneQ.getfront()->getTdeparture(), totalPlanesLeft);
+
+                hours = AirplaneQ.getfront()->getTdeparture() / 60;
+                minutes = AirplaneQ.getfront()->getTdeparture() % 60;
+
+                cout << "Runway is free at " << hours << ":" << minutes << endl;
+
+                Airplane served = AirplaneQ.removeAirplane(); // The first plane in the queue lands and is served
+                served.hasLanded();
+
+                cout << hours << ":" << minutes << " --> Runway is now free" << endl;
+
+                totalPlanesLeft++;
+
+            } else {
+                int waitTime = AirplaneQ.getfront()->getTdeparture() - plane.getTarrival();
+                if (AirplaneQ.queueLength() == 1)
+                    waitTime = 0;
+                else
+                    cout << "Please remain airborne for: " << waitTime << " minutes" << endl;
+
+                plane.setTwait(waitTime);
+                totalWaitTime += waitTime;
+                time += waitTime;
+
+                totalPlanesDelayed++;
+
+                Airplane served = AirplaneQ.removeAirplane(); // The first plane in the queue lands and is served
+                served.hasLanded();
+
             }
-            plane.hasLanded();
-            totalPlanesLeft++;
-
         }
 
-        /*
-        nextPlaneIn -= 1.0; // Decrement time until the next plane arrival
-        if (nextPlaneIn <= 0) { // If the time until the next plane arrival is up
-            nextPlaneIn = Generate_Random(Dt); // Generate a new time until the next plane arrival
-        }*/
     }
 
     // Print simulation statistics
@@ -95,9 +134,3 @@ int main() {
 
     return 0;
 }
-
-void planeDeparture(int i, int j, int &k) {
-    if (i > j) {
-       // k+=3;
-    }
-};
